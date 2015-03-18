@@ -189,17 +189,40 @@ namespace SurAsServer
                 {
                     setPic = new ShowPicHandler(showPic);
                 }
-                canvas.Dispatcher.BeginInvoke(setPic, DispatcherPriority.Normal, new Object[] { path });
+                //canvas.Dispatcher.BeginInvoke(setPic, DispatcherPriority.Normal, new Object[] { path });
+                scatterView.Dispatcher.BeginInvoke(setPic, DispatcherPriority.Normal, new Object[] { path });
+                
             }
             else
             {
-                Pic pic = new Pic(path);
-                Vector pos = randomPos();
-               
-                pic.putPicAt(new System.Windows.Point(position.X + pos.X, position.Y + pos.Y));
-                pic.setRelativePos(pos);
-                canvas.Children.Add(pic);
-                imageMap.Add(path, pic);
+                Image image = new Image();
+                BitmapImage img = new BitmapImage(new Uri(path));
+
+                double minLength = 50.0;
+                double coff = getMax(minLength / img.Width, minLength / img.Height);
+                image.Width = img.Width * coff;
+                image.Height = img.Height * coff;
+                image.Source = img;
+
+                Vector pos = randomPos(); 
+                ScatterViewItem item = new ScatterViewItem();
+                item.Content = image;
+                item.Center = new System.Windows.Point(position.X + pos.X, position.Y + pos.Y);
+
+                
+                        
+                
+                scatterView.Items.Add(item);
+
+
+
+                //Pic pic = new Pic(path);
+                //Vector pos = randomPos();
+
+                //pic.putPicAt(new System.Windows.Point(position.X + pos.X, position.Y + pos.Y));
+                //pic.setRelativePos(pos);
+                //canvas.Children.Add(pic);
+                //imageMap.Add(path, pic);
             }
 
 

@@ -28,6 +28,7 @@ namespace SurAsServer
             image = new Image();
             image.TouchMove += new EventHandler<TouchEventArgs>(imageTouchDown);
             image.TouchDown += new EventHandler<TouchEventArgs>(imageTouchMove);
+            
             canvas.Children.Add(image);
         }
 

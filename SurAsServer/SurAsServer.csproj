@@ -60,6 +60,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Margin.cs" />
     <Compile Include="Pic.xaml.cs">
       <DependentUpon>Pic.xaml</DependentUpon>
     </Compile>
