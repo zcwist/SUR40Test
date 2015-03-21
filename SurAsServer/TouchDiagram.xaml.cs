@@ -25,7 +25,7 @@ namespace SurAsServer
     public partial class TouchDiagram : UserControl
     {
         private Ellipse circle;
-        private int radius = 250;
+        public int radius = 250;
         private SolidColorBrush color = Brushes.Black;
         private TouchPoint lastPoint;
         private int numOfToRight = 0; //摇晃时到右则极值次数 
@@ -37,11 +37,15 @@ namespace SurAsServer
         public Point position;
         private Dictionary<String,Pic> imageMap;
 
-        public TouchDiagram()
+        public SurfaceWindow1 surface;
+
+
+        public TouchDiagram(SurfaceWindow1 surface)
         {
             InitializeComponent();
             imageMap = new Dictionary<string, Pic>();
             lastPoint = null;
+            this.surface = surface;
         }
 
         private void shaked()
@@ -208,6 +212,9 @@ namespace SurAsServer
                 ScatterViewItem item = new ScatterViewItem();
                 item.Content = image;
                 item.Center = new System.Windows.Point(position.X + pos.X, position.Y + pos.Y);
+                item.ContainerManipulationCompleted += new ContainerManipulationCompletedEventHandler(itemContainerManipulationCompleted);
+                item.Uid = path;
+
 
                 
                         
@@ -226,6 +233,16 @@ namespace SurAsServer
             }
 
 
+        }
+
+        private void itemContainerManipulationCompleted(Object sender, ContainerManipulationCompletedEventArgs args)
+        {
+            Console.WriteLine("ContainerManinpulationCompleted");
+            ScatterViewItem item = (ScatterViewItem)sender;
+            //Image image = (Image)item.Content;
+            string picPath = item.Uid;
+            Console.WriteLine(item.Center.ToString());
+            surface.findTouchDiagram(item.Center, picPath);
         }
         private double getMax(double a, double b)
         {

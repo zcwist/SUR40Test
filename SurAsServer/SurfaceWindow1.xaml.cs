@@ -152,7 +152,7 @@ namespace SurAsServer
         {
             //if two touch Device is too closed, don't addTouchDiagram
             if (isClose(touchDevice)) return;
-            TouchDiagram touchDiagram = new TouchDiagram();
+            TouchDiagram touchDiagram = new TouchDiagram(this);
             touchDiagram.position = touchDevice.GetPosition(this);
             diagrams.Add(touchDevice, touchDiagram);
             DiagramContainerGrid.Children.Add(touchDiagram);
@@ -513,6 +513,62 @@ namespace SurAsServer
             if (a > b) return a;
             return b;
         }
+
+
+
+        public void findTouchDiagram(System.Windows.Point center, string picPath)
+        {
+            foreach (KeyValuePair<TouchDevice, TouchDiagram> diagram in diagrams)
+            {
+                if ((getDistance(diagram.Value.position, center) < Math.Pow(diagram.Value.radius, 2)))
+                {
+                    // the image is in the diagram
+                    sendPic(diagram.Key, picPath);
+                    break;
+                }
+               
+            }
+        }
+
+        private void sendPic(TouchDevice des, string picPath)
+        {
+            Socket socket = getSocketByTouchDevice(des);
+            try
+            {
+                socket.SendFile(picPath);
+                byte[] end = new byte[3];
+                end[0] = 0x0D;
+                end[1] = 0x0A;
+                end[2] = 0x0A;
+                socket.Send(end);
+                ShowMsg(picPath + "is sent to " + socket.RemoteEndPoint.ToString());
+            }
+            catch
+            {
+
+                ShowMsg("Something wrong with socket");
+            }
+        }
+
+        private Socket getSocketByTouchDevice(TouchDevice touchDevice)
+        {
+            Console.WriteLine(dictTouchDevices.Keys.Count + "touch device(s)");
+            foreach(KeyValuePair<string,TouchDevice> touch in dictTouchDevices)
+            {
+                if (touch.Value.Equals(touchDevice))
+                {
+                    Console.WriteLine(touch.Key);
+                    Socket socket;
+                    if (dict.TryGetValue(touch.Key, out socket))
+                    {
+                        return socket;
+                    }
+                    
+                }
+            }
+            return null;
+        }
+
 
 
         //public delegate void ShowPicHandler(BitmapImage img);
