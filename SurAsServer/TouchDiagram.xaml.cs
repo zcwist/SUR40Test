@@ -35,7 +35,7 @@ namespace SurAsServer
 
         private SurfaceButton button;
         public Point position;
-        private Dictionary<String,Pic> imageMap;
+        //private Dictionary<String, Pic> imageMap;
 
         public SurfaceWindow1 surface;
 
@@ -43,7 +43,7 @@ namespace SurAsServer
         public TouchDiagram(SurfaceWindow1 surface)
         {
             InitializeComponent();
-            imageMap = new Dictionary<string, Pic>();
+            //imageMap = new Dictionary<string, Pic>();
             lastPoint = null;
             this.surface = surface;
         }
@@ -67,7 +67,8 @@ namespace SurAsServer
             shakeChecker(touchDevice);
             updateCircle(touchDevice);
             updateButton(touchDevice);
-            updatePic(touchDevice);
+            picDetector(touchDevice);
+            //updatePic(touchDevice);
         }
 
         //检测摇晃动作
@@ -132,24 +133,42 @@ namespace SurAsServer
             Canvas.SetLeft(button, touchDevice.GetTouchPoint(this).Position.X + radius - 20);
             Canvas.SetTop(button, touchDevice.GetTouchPoint(this).Position.Y - button.Height / 2);
         }
-        private void updatePic(TouchDevice touchDevice)
-        {
-            //if (image == null)
-            //{
-            //    image = new Image();
-            //    image.Height = 50;
-            //    image.Width = 50;
-            //    canvas.Children.Add(image);
-            //}
-            //Canvas.SetLeft(image, touchDevice.GetTouchPoint(this).Position.X + 5);
-            //Canvas.SetTop(image, touchDevice.GetTouchPoint(this).Position.Y);
-            foreach (KeyValuePair<String, Pic> image in imageMap)
-            {
-                Pic pic = image.Value;
-                Vector pos = pic.getRelativePos();
+        //private void updatePic(TouchDevice touchDevice)
+        //{
+        //    //if (image == null)
+        //    //{
+        //    //    image = new Image();
+        //    //    image.Height = 50;
+        //    //    image.Width = 50;
+        //    //    canvas.Children.Add(image);
+        //    //}
+        //    //Canvas.SetLeft(image, touchDevice.GetTouchPoint(this).Position.X + 5);
+        //    //Canvas.SetTop(image, touchDevice.GetTouchPoint(this).Position.Y);
+        //    foreach (KeyValuePair<String, Pic> image in imageMap)
+        //    {
+        //        Pic pic = image.Value;
+        //        Vector pos = pic.getRelativePos();
 
-                pic.putPicAt(new System.Windows.Point(position.X + pos.X, position.Y + pos.Y));
+        //        pic.putPicAt(new System.Windows.Point(position.X + pos.X, position.Y + pos.Y));
+        //    }
+        //}
+
+        private void picDetector(TouchDevice touchDevice)
+        {
+            Point center = touchDevice.GetCenterPosition(this);
+            foreach (KeyValuePair<ScatterViewItem,string> photo in surface.photoList){
+                if (getDistance(center, photo.Key.Center) < radius * radius)
+                {
+                    surface.sendPic(touchDevice, photo.Value);
+                    return;
+                }
+
             }
+            
+        }
+        private double getDistance(System.Windows.Point point1, System.Windows.Point point2)
+        {
+            return (Math.Pow((point1.X - point2.X), 2) + Math.Pow((point1.Y - point2.Y), 2));
         }
 
 
@@ -215,11 +234,8 @@ namespace SurAsServer
                 item.ContainerManipulationCompleted += new ContainerManipulationCompletedEventHandler(itemContainerManipulationCompleted);
                 item.Uid = path;
 
-
-                
-                        
-                
                 scatterView.Items.Add(item);
+                surface.photoList.Add(item, path);
 
 
 

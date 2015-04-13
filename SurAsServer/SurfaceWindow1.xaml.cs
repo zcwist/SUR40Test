@@ -44,6 +44,9 @@ namespace SurAsServer
         Dictionary<TouchDevice, TouchDiagram> diagrams;
         //保存服务器端所有的设备TouchDevice
         Dictionary<string, TouchDevice> dictTouchDevices;
+        
+        //保存图片列表
+        public Dictionary<ScatterViewItem, string> photoList;
 
         /// <summary>
         /// Default constructor.
@@ -52,6 +55,7 @@ namespace SurAsServer
         {
             diagrams = new Dictionary<TouchDevice, TouchDiagram>();
             dictTouchDevices = new Dictionary<string, TouchDevice>();
+            photoList = new Dictionary<ScatterViewItem, string>();
             InitializeComponent();
 
             // Add handlers for window availability events
@@ -142,10 +146,16 @@ namespace SurAsServer
             updateTouchDiagram(e.TouchDevice);
         }
 
-        private void OnTouchLeave(object sender, TouchEventArgs e)
+        //private void OnTouchLeave(object sender, TouchEventArgs e)
+        //{
+        //    removeTouchDiagram(e.TouchDevice);
+        //    removeConnection(e.TouchDevice);
+        //}
+
+        private void OnLostTouchCapture(object sender, TouchEventArgs e)
         {
-            //removeTouchDiagram(e.TouchDevice);
-            //removeConnection(e.TouchDevice);
+            removeTouchDiagram(e.TouchDevice);
+            removeConnection(e.TouchDevice);
         }
 
         private void addTouchDiagram(TouchDevice touchDevice)
@@ -337,6 +347,7 @@ namespace SurAsServer
             System.IO.MemoryStream writeStream = null;
             System.IO.BinaryWriter bWriter = null;
             Socket socketClient = socketClientPara as Socket;
+            Boolean isReceiving = false;
 
             while (true)
             {
@@ -375,10 +386,11 @@ namespace SurAsServer
                 {
                     tag = strMsgReceive.Substring(strMsgReceive.Length - 3);
                 }
-                if (tag.Equals("art")) //开始传json
+                if (tag.Equals("art") && (!isReceiving)) //开始传json
                 {
                     writeStream = new System.IO.MemoryStream();
                     bWriter = new System.IO.BinaryWriter(writeStream);
+                    isReceiving = true;
                 }
                 else if (tag.EndsWith("}")) //json串结束
                 {
@@ -390,6 +402,7 @@ namespace SurAsServer
                     bWriter = null;
                     writeStream.Close();
                     writeStream = null;
+                    isReceiving = false;
                 }
                
 
@@ -530,7 +543,7 @@ namespace SurAsServer
             }
         }
 
-        private void sendPic(TouchDevice des, string picPath)
+        public void sendPic(TouchDevice des, string picPath)
         {
             Socket socket = getSocketByTouchDevice(des);
             try
